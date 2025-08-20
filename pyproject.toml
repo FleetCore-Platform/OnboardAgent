@@ -1,0 +1,15 @@
+[project]
+name = "onboardagent"
+version = "0.1.0"
+description = "Onboard controller agent for PX4 companion computers, providing MAVSDK integration and MQTT messaging bridge."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "awsiotsdk>=1.24.0",
+    "mavsdk>=3.9.0",
+    "mypy>=1.17.1",
+]
+
+[[tool.mypy.overrides]]
+module = ["untyped_package.*"]
+follow_untyped_imports = true
