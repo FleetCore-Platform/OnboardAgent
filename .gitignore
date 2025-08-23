@@ -1,3 +1,12 @@
+# IDE
+.idea/
+
+# Test certs
+certs/
+*.pem
+*.key
+*.crt
+
 # PX4 Toolchain directory
 PX4-Autopilot/
 
