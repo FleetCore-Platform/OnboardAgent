@@ -1,14 +1,16 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0.
 from pathlib import Path
 
-from awscrt import mqtt, http
+import dotenv
+from awscrt import mqtt
 from awsiot import mqtt_connection_builder
 import sys
 import threading
 import time
 import json
+
 from rich.traceback import install
+
+config: dict[str, str | None] = dotenv.dotenv_values(".config.env")
 
 install()
 
@@ -37,7 +39,6 @@ def on_resubscribe_complete(resubscribe_future):
         if qos is None:
             sys.exit("Server rejected resubscribe to topic: {}".format(topic))
 
-
 def on_message_received(topic, payload, dup, qos, retain, **kwargs):
     print("Received message from topic '{}': {}".format(topic, payload))
     global received_count
@@ -57,8 +58,6 @@ def on_connection_closed(connection, callback_data):
     print("Connection closed")
 
 if __name__ == '__main__':
-    proxy_options = None
-
     BASE_DIR = Path(__file__).resolve().parent
     CERTS = BASE_DIR.parent / "certs"
 
@@ -66,10 +65,10 @@ if __name__ == '__main__':
         cert_filepath=str(CERTS / "test1.cert.pem"),
         pri_key_filepath=str(CERTS / "test1.private.key"),
         ca_filepath=str(CERTS / "root-CA.crt"),
-        endpoint="a1o97nvv7oeuka-ats.iot.eu-north-1.amazonaws.com",
+        endpoint=config["IOT_ENDPOINT"],
         on_connection_interrupted=on_connection_interrupted,
         on_connection_resumed=on_connection_resumed,
-        client_id="basicPubSub",
+        client_id=config["IOT_CLIENT_ID"],
         clean_session=False,
         keep_alive_secs=30,
         on_connection_success=on_connection_success,

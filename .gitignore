@@ -1,6 +1,9 @@
 # IDE
 .idea/
 
+# Env
+.config.env
+
 # Test certs
 certs/
 *.pem
