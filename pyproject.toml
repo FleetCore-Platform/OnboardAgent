@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "awsiotsdk>=1.24.0",
+    "loguru>=0.7.3",
     "mavsdk>=3.9.0",
     "mypy>=1.17.1",
     "pydantic>=2.11.7",

@@ -1,3 +1,5 @@
+from loguru import logger
+
 import dotenv
 from awscrt import mqtt_request_response
 from awsiot import iotjobs, mqtt5_client_builder
@@ -45,7 +47,7 @@ class IoTJobsClient:
 
     def connect(self):
         self.mqtt5_client.start()
-        print("Jobs client connected to MQTT broker")
+        logger.info("Jobs client connected to MQTT broker")
 
     def get_pending_jobs(self) -> GetPendingJobExecutionsResponse:
         """Get list of pending job executions."""
@@ -79,7 +81,7 @@ class IoTJobsClient:
             job_document: Job = Job.model_validate(job_data.job_document)
             return job_document
         except ValidationError as err:
-            print("Unknown job document, cannot validate..")
+            logger.warning("Unknown job document, cannot validate..")
             return None
 
     def describe_job_execution(self, job_id: str) -> DescribeJobExecutionResponse:
@@ -90,7 +92,7 @@ class IoTJobsClient:
         result: DescribeJobExecutionResponse = self.jobs_client.describe_job_execution(
             req
         ).result()
-        print(f"Job {job_id} details: {result}")
+        logger.debug(f"Job {job_id} details: {result}")
         return result
 
     def update_job(self, job_id: str, status: JobStatus) -> None:
@@ -98,8 +100,8 @@ class IoTJobsClient:
             thing_name=self.thing_name, job_id=job_id, status=status.value
         )
         result = self.jobs_client.update_job_execution(req).result()
-        print(f"Updated job {job_id}: {result}")
+        logger.debug(f"Updated job {job_id}: {result}")
 
     def disconnect(self) -> None:
         self.mqtt5_client.stop()
-        print("Disconnected jobs client")
+        logger.info("Disconnected jobs client")

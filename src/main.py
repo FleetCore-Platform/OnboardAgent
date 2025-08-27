@@ -1,4 +1,5 @@
 import time
+from loguru import logger
 from pathlib import Path
 
 import dotenv
@@ -31,7 +32,7 @@ internal_topic = f"$aws/things/{thing_name}/jobs/notify"
 def job_handler(topic, payload, **_):
     next_queued_job: JobExecutionSummary = jobs_client.get_next_queued_job()
     if not next_queued_job:
-        print("No next queued job")
+        logger.debug("No next queued job")
         return
 
     next_job_id: str = next_queued_job.job_id
@@ -46,14 +47,16 @@ def job_handler(topic, payload, **_):
         )
 
         if status == 0:
-            print("Download succeeded..")
+            logger.info("Download succeeded..")
             jobs_client.update_job(next_job_id, JobStatus.SUCCEEDED)
         else:
-            print("Download failed, cancelling execution..")
+            logger.warning("Download failed, cancelling execution..")
             jobs_client.update_job(next_job_id, JobStatus.FAILED)
 
     else:
-        print(f"Unknown or invalid job document in job {next_job_id}, rejecting...")
+        logger.warning(
+            f"Unknown or invalid job document in job {next_job_id}, rejecting..."
+        )
         jobs_client.update_job(next_job_id, JobStatus.REJECTED)
 
 
@@ -82,9 +85,9 @@ if __name__ == "__main__":
         while True:
             time.sleep(0)
     except (KeyboardInterrupt, InterruptedError):
-        print("Stopping")
+        logger.info("Stopping")
     except Exception as e:
-        print(e)
+        logger.error(e)
     finally:
         jobs_client.disconnect()
         basic_client.disconnect()

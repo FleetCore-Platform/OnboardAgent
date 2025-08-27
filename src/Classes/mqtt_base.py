@@ -1,4 +1,6 @@
 import json
+from loguru import logger
+
 import dotenv
 from awscrt import mqtt
 from awsiot import mqtt_connection_builder
@@ -29,28 +31,28 @@ class IoTBaseClient:
     def connect(self):
         future = self.mqtt_connection.connect()
         future.result()
-        print("Basic MQTT client connected")
+        logger.info("Basic MQTT client connected")
 
     def subscribe(self, topic: str, callback):
         future, _ = self.mqtt_connection.subscribe(
             topic=topic, qos=mqtt.QoS.AT_LEAST_ONCE, callback=callback
         )
         future.result()
-        print(f"Subscribed to {topic}")
+        logger.info(f"Subscribed to {topic}")
 
     def unsubscribe(self, topic: str):
         future, _ = self.mqtt_connection.unsubscribe(topic=topic)
         future.result()
-        print(f"Unsubscribed from {topic}")
+        logger.info(f"Unsubscribed from {topic}")
 
     def publish(self, topic: str, message: str):
         payload = json.dumps(message)
         self.mqtt_connection.publish(
             topic=topic, payload=payload, qos=mqtt.QoS.AT_LEAST_ONCE
         )
-        print(f"Published to {topic}: {message}")
+        logger.debug(f"Published to {topic}: {message}")
 
     def disconnect(self):
         future = self.mqtt_connection.disconnect()
         future.result()
-        print("Disconnected basic client")
+        logger.info("Disconnected basic client")
