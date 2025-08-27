@@ -8,6 +8,7 @@ dependencies = [
     "awsiotsdk>=1.24.0",
     "mavsdk>=3.9.0",
     "mypy>=1.17.1",
+    "pydantic>=2.11.7",
     "python-dotenv>=1.1.1",
     "rich>=14.1.0",
 ]
