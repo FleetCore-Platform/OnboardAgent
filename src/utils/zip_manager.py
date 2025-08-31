@@ -1,16 +1,25 @@
 import os
 from zipfile import ZipFile
+from loguru import logger
 
 
-def extract_mission(thing_name: str, path: str) -> str | None:
-    out_path = os.path.join(path, thing_name)
+def extract_mission(zip_path: str, member_name: str, output_path: str) -> str | None:
+    """
+    Extracts a specific member from a zip file to a new path.
+    This is a minimal and corrected version of the previous function.
+    """
+    extracted_file_path = os.path.join(output_path, member_name)
 
     try:
-        with ZipFile(path) as archive:
-            archive.extract(member=thing_name, path=out_path)
+        with ZipFile(zip_path, "r") as archive:
+            archive.extract(member=member_name, path=output_path)
 
-        return out_path
-
+            logger.info(f"Extracted mission {member_name} to {output_path}")
+            return extracted_file_path
     except Exception as e:
-        print(e)
+        logger.error(e)
         return None
+
+
+# if __name__ == "__main__":
+#     extract_mission("/tmp/missions/mission.bundle.zip", "test1", "/tmp/missions/")

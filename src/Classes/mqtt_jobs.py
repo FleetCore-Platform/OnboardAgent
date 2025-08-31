@@ -71,8 +71,9 @@ class IoTJobsClient:
             return jobs.queued_jobs[0]
         return None
 
+    @staticmethod
     def get_job_documents(
-        self, job_describe_response: DescribeJobExecutionResponse
+        job_describe_response: DescribeJobExecutionResponse,
     ) -> Job | None:
         """Get job documents."""
         job_data: JobExecutionData = job_describe_response.execution

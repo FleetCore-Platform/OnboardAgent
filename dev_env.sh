@@ -9,7 +9,7 @@ run() {
         --network host \
         --name=px4-sim \
         px4io/px4-dev-simulation-focal:latest bash \
-        -c "cd /src/PX4-Autopilot && make px4_sitl_default gazebo-classic; exec bash"
+        -c "cd /src/PX4-Autopilot && make px4_sitl gazebo-classic; exec bash"
 
   docker container remove px4-sim
 }
