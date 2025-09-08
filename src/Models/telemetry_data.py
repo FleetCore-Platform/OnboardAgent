@@ -11,10 +11,10 @@ class Position(BaseModel):
 
 
 class Battery(BaseModel):
-    temperature_degc: Any
+    temperature_degc: float
     voltage_v: float
-    current_battery_a: Any
-    capacity_consumed_ah: Any
+    current_battery_a: float
+    capacity_consumed_ah: float
     remaining_percent: float
 
 
