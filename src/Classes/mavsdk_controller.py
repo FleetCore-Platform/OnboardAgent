@@ -1,4 +1,5 @@
 import asyncio
+import base64
 from functools import wraps
 from typing import Callable
 
@@ -161,12 +162,14 @@ class MavsdkController:
         return telemetry.model_dump_json()
 
     @ensure_connected
-    async def get_telemetry_cbor(self) -> bytes:
+    async def get_telemetry_cbor(self) -> str:
         """
         Fetches the drone's telemetry data to a CBOR serialized object.
         Returns:
-            bytes: The bytes of a CBOR serialized TelemetryData object containing the telemetry.
+            str: Base64 ascii string of the CBOR serialized TelemetryData object containing the telemetry.
         """
         telemetry: TelemetryData = await self.get_telemetry()
 
-        return cbor2.dumps(telemetry.model_dump())
+        cbor_bytes: bytes = cbor2.dumps(telemetry.model_dump())
+        encoded = base64.b64encode(cbor_bytes).decode("ascii")
+        return encoded

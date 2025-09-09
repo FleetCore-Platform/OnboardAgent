@@ -46,9 +46,8 @@ class IoTBaseClient:
         logger.info(f"Unsubscribed from {topic}")
 
     def publish(self, topic: str, message: str):
-        payload = json.dumps(message)
         self.mqtt_connection.publish(
-            topic=topic, payload=payload, qos=mqtt.QoS.AT_LEAST_ONCE
+            topic=topic, payload=message, qos=mqtt.QoS.AT_LEAST_ONCE
         )
         logger.debug(f"Published to {topic}: {message}")
 

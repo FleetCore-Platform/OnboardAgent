@@ -1,11 +1,15 @@
 import asyncio
+import base64
 import time
+
+import cbor2
 from loguru import logger
 from pathlib import Path
 
 import dotenv
 
 from src.Classes.mavsdk_controller import MavsdkController
+from src.Models.telemetry_data import TelemetryData, Battery, Position, Health
 from src.utils.download_handler import handle_download
 
 from awsiot.iotjobs import JobExecutionSummary
@@ -132,7 +136,7 @@ if __name__ == "__main__":
     jobs_client.connect()
     basic_client.connect()
 
-    basic_client.subscribe(internal_topic, job_handler)
+    # basic_client.subscribe(internal_topic, job_handler)
 
     # TODO: Implement cancel job logic
     # basic_client.subscribe(cancel_topic)
@@ -147,8 +151,6 @@ if __name__ == "__main__":
     try:
         while True:
             loop.run_until_complete(asyncio.sleep(1))
-            # You can also publish telemetry here if needed
-            # basic_client.publish(telemetry_topic, '{"Battery": "100.00"}')
 
     except (KeyboardInterrupt, InterruptedError):
         logger.info("Stopping")
