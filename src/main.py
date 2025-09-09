@@ -30,6 +30,7 @@ config: dict[str, str | None] = dotenv.dotenv_values(".config.env")
 thing_name: str = config["IOT_THING_NAME"]
 
 internal_topic = f"$aws/things/{thing_name}/jobs/notify"
+cancel_topic = f"groups/{thing_name}/cancel"
 telemetry_topic = f"devices/{thing_name}/telemetry"
 
 in_execution = False
@@ -132,6 +133,9 @@ if __name__ == "__main__":
     basic_client.connect()
 
     basic_client.subscribe(internal_topic, job_handler)
+
+    # TODO: Implement cancel job logic
+    # basic_client.subscribe(cancel_topic)
 
     # basic_client.subscribe(
     #     f"devices/{thing_name}/messages",

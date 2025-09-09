@@ -102,6 +102,15 @@ class MavsdkController:
             logger.error(f"Failed to start mission: {e}")
 
     @ensure_connected
+    async def cancel_mission(self) -> None:
+        try:
+            logger.info("Canceling mission, returning to home.  .")
+            await self.system.mission_raw.clear_mission()
+            await self.system.action.return_to_launch()
+        except Exception as e:
+            logger.error(f"Failed to cancel mission: {e}")
+
+    @ensure_connected
     async def subscribe_mission_finished(self, callback: Callable) -> None:
         try:
             logger.info(f"Subscribing to mission completed!")
