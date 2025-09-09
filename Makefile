@@ -1,5 +1,7 @@
 .PHONY: de format build run
 
+default: run
+
 de:
 	@uv venv
 	uv sync
