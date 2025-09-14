@@ -15,15 +15,15 @@ class IoTBaseClient:
         config_path: str = ".config.env",
     ):
         self.config: dict[str, str | None] = dotenv.dotenv_values(config_path)
-        if not self.config.get("IOT_ENDPOINT") or not self.config.get("IOT_CLIENT_ID"):
-            raise ValueError("Missing IOT_ENDPOINT or IOT_CLIENT_ID in config")
+        if not self.config.get("IOT_ENDPOINT") or not self.config.get("IOT_THING_NAME"):
+            raise ValueError("Missing IOT_ENDPOINT or IOT_THING_NAME in config")
 
         self.mqtt_connection = mqtt_connection_builder.mtls_from_path(
             cert_filepath=cert_filepath,
             pri_key_filepath=pri_key_filepath,
             ca_filepath=ca_filepath,
             endpoint=self.config["IOT_ENDPOINT"],
-            client_id=self.config["IOT_CLIENT_ID"],
+            client_id=self.config["IOT_THING_NAME"],
             clean_session=False,
             keep_alive_secs=30,
         )

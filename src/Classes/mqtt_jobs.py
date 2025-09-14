@@ -24,8 +24,8 @@ class IoTJobsClient:
         config_path: str = ".config.env",
     ):
         self.config: dict[str, str | None] = dotenv.dotenv_values(config_path)
-        if not self.config.get("IOT_ENDPOINT") or not self.config.get("IOT_CLIENT_ID"):
-            raise ValueError("Missing IOT_ENDPOINT or IOT_CLIENT_ID in config")
+        if not self.config.get("IOT_ENDPOINT") or not self.config.get("IOT_THING_NAME"):
+            raise ValueError("Missing IOT_ENDPOINT or IOT_THING_NAME in config")
 
         self.thing_name = thing_name
 
