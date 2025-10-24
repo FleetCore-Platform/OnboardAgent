@@ -1,10 +1,10 @@
-class ConfigError(Exception):
+class ConfigException(Exception):
     pass
 
 
-class ConfigValueError(ConfigError):
+class ConfigValueException(ConfigException):
     pass
 
 
-class ConfigTypeError(ConfigError):
+class ConfigTypeException(ConfigException):
     pass

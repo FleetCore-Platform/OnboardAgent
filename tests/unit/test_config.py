@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 from src.config import Config
 from src.enums.connection_types import ConnectionTypes
-from src.exceptions.config_exceptions import ConfigValueError, ConfigTypeError
+from src.exceptions.config_exceptions import ConfigValueException, ConfigTypeException
 
 
 class ConfigTest(unittest.TestCase):
@@ -33,7 +33,7 @@ class ConfigTest(unittest.TestCase):
     def test_missing_required_field(self, mock_dotenv):
         mock_dotenv.return_value = {"IOT_ENDPOINT": "test.iot.aws.com"}
 
-        with self.assertRaises(ConfigValueError) as ctx:
+        with self.assertRaises(ConfigValueException) as ctx:
             Config()
 
         assert "IOT_THING_NAME" in str(ctx.exception)
@@ -51,7 +51,7 @@ class ConfigTest(unittest.TestCase):
             "CA_FILEPATH": "/certs/ca.pem",
         }
 
-        with self.assertRaises(ConfigTypeError) as ctx:
+        with self.assertRaises(ConfigTypeException) as ctx:
             Config()
 
         assert "must be integer" in str(ctx.exception)
@@ -69,7 +69,7 @@ class ConfigTest(unittest.TestCase):
             "CA_FILEPATH": "/certs/ca.pem",
         }
 
-        with self.assertRaises(ConfigTypeError) as ctx:
+        with self.assertRaises(ConfigTypeException) as ctx:
             Config()
 
         assert "ConnectionTypes" in str(ctx.exception)

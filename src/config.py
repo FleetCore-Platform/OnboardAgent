@@ -3,7 +3,7 @@ import os.path
 from dotenv import dotenv_values
 
 from src.enums.connection_types import ConnectionTypes
-from src.exceptions.config_exceptions import ConfigValueError, ConfigTypeError
+from src.exceptions.config_exceptions import ConfigValueException, ConfigTypeException
 
 
 class Config:
@@ -27,7 +27,7 @@ class Config:
     def _require(self, config: dict, key: str) -> str:
         value = config.get(key)
         if value is None:
-            raise ConfigValueError(f"{key} not set")
+            raise ConfigValueException(f"{key} not set")
         return value
 
     def _require_path(self, config: dict, key: str) -> str:
@@ -36,18 +36,18 @@ class Config:
         if os.path.exists(value) and os.path.isfile(value):
             return value
         else:
-            raise ConfigTypeError(f"{key} not a file")
+            raise ConfigTypeException(f"{key} not a file")
 
     def _require_int(self, config: dict, key: str) -> int:
         value = self._require(config, key)
         try:
             return int(value)
         except ValueError:
-            raise ConfigTypeError(f"{key} must be integer")
+            raise ConfigTypeException(f"{key} must be integer")
 
     def _require_enum(self, config: dict, key: str, enum_type):
         value = self._require(config, key)
         try:
             return enum_type(value)
         except ValueError:
-            raise ConfigTypeError(f"{key} must be valid {enum_type.__name__}")
+            raise ConfigTypeException(f"{key} must be valid {enum_type.__name__}")
