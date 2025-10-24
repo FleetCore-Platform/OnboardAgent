@@ -30,7 +30,7 @@ def ensure_dir(path: str) -> None:
     """
     directory = os.path.dirname(path)
     if not os.path.exists(directory):
-        logger.error(f"Creating directory {directory}, because it does not exist!")
+        logger.warning(f"Creating directory {directory}, because it does not exist!")
         os.makedirs(directory)
 
 
