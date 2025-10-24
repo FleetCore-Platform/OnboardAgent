@@ -50,6 +50,10 @@ class JobCoordinator:
 
         self.mqtt.subscribe(self.config.internal_topic, self._job_notification_handler)
 
+    async def run(self):
+        while True:
+            await asyncio.sleep(1)
+
     def _job_notification_handler(self, topic, payload, **kwargs):
         """Handle job notification from MQTT."""
         if self.state.get_state() != ExecutionState.IDLE:
@@ -191,52 +195,3 @@ class JobCoordinator:
         logger.info("Shutting down coordinator")
         await self.mqtt.disconnect()
         logger.info("Coordinator stopped")
-
-
-async def main():
-    config: Config = Config()
-
-    mqtt = MqttManager(
-        config.cert_filepath,
-        config.pri_key_filepath,
-        config.ca_filepath,
-        config.endpoint,
-        config.thing_name,
-        30,
-    )
-
-    drone = MavsdkController(
-        config.drone_address,
-        config.drone_port,
-        config.drone_connection_type,
-    )
-
-    state = StateMachine()
-    loop = asyncio.get_event_loop()
-
-    coordinator = JobCoordinator(config, mqtt, drone, state, loop)
-
-    try:
-        await coordinator.start()
-
-        # Keep running
-        while True:
-            await asyncio.sleep(1)
-
-    except KeyboardInterrupt:
-        logger.info("Interrupted, shutting down")
-    except Exception as e:
-        logger.error(f"Fatal error: {e}")
-    finally:
-        await coordinator.stop()
-
-
-if __name__ == "__main__":
-    main_loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(main_loop)
-    try:
-        main_loop.run_until_complete(main())
-    except KeyboardInterrupt:
-        logger.warning("Received CTRL-C, shutting down..")
-    finally:
-        main_loop.close()
