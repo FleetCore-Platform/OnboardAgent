@@ -12,3 +12,10 @@ format:
 
 run: format
 	uv run -m src.main
+
+test:
+ifeq ($(all),1)
+	uv run pytest tests/
+else
+	uv run pytest tests/unit/
+endif

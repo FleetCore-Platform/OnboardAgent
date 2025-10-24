@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "awsiotsdk>=1.24.0",
     "cbor2>=5.7.0",
+    "dependency-injector>=4.48.2",
     "loguru>=0.7.3",
     "mavsdk>=3.9.0",
     "mypy>=1.17.1",
@@ -18,3 +19,8 @@ dependencies = [
 [[tool.mypy.overrides]]
 module = ["untyped_package.*"]
 follow_untyped_imports = true
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.4.2",
+]
