@@ -50,6 +50,8 @@ class JobCoordinator:
 
         self.mqtt.subscribe(self.config.internal_topic, self._job_notification_handler)
 
+        asyncio.run_coroutine_threadsafe(self._process_next_job(), self.loop)
+
     async def run(self):
         while True:
             await asyncio.sleep(1)
