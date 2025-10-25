@@ -1,4 +1,6 @@
 import os.path
+from os import _Environ
+from typing import Optional
 
 from dotenv import dotenv_values
 
@@ -7,8 +9,11 @@ from src.exceptions.config_exceptions import ConfigValueException, ConfigTypeExc
 
 
 class Config:
-    def __init__(self, config_file=".config.env"):
-        raw = dotenv_values(config_file)
+    def __init__(self, config_file: Optional[str] = None):
+        if config_file:
+            raw: dict[str, str | None] = dotenv_values(config_file)
+        else:
+            raw: _Environ[str] = os.environ
 
         self.endpoint: str = self._require(raw, "IOT_ENDPOINT")
         self.thing_name: str = self._require(raw, "IOT_THING_NAME")
@@ -24,13 +29,13 @@ class Config:
         self.cancel_topic = f"groups/{self.thing_name}/cancel"
         self.telemetry_topic = f"devices/{self.thing_name}/telemetry"
 
-    def _require(self, config: dict, key: str) -> str:
+    def _require(self, config: dict | _Environ[str], key: str) -> str:
         value = config.get(key)
         if value is None:
             raise ConfigValueException(f"{key} not set")
         return value
 
-    def _require_path(self, config: dict, key: str) -> str:
+    def _require_path(self, config: dict | _Environ[str], key: str) -> str:
         value = self._require(config, key)
 
         if os.path.exists(value) and os.path.isfile(value):
@@ -38,14 +43,14 @@ class Config:
         else:
             raise ConfigTypeException(f"{key} not a file")
 
-    def _require_int(self, config: dict, key: str) -> int:
+    def _require_int(self, config: dict | _Environ[str], key: str) -> int:
         value = self._require(config, key)
         try:
             return int(value)
         except ValueError:
             raise ConfigTypeException(f"{key} must be integer")
 
-    def _require_enum(self, config: dict, key: str, enum_type):
+    def _require_enum(self, config: dict | _Environ[str], key: str, enum_type):
         value = self._require(config, key)
         try:
             return enum_type(value)
