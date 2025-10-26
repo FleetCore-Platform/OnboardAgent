@@ -19,6 +19,8 @@ from src.exceptions.drone_excetions import (
 from src.models.job_document import Job
 
 from src.exceptions.mqtt_exceptions import MqttConnectionException
+from src.telemetry.collector import TelemetryCollector
+from src.telemetry.publisher import TelemetryPublisher
 from src.utils.download_handler import handle_download
 from src.utils.zip_manager import extract_mission
 
@@ -39,6 +41,7 @@ class JobCoordinator:
         self.loop = loop
         self.current_job_id: Optional[str] = None
         self.job_document: Optional[Job] = None
+        self.telemetry_collector: Optional[TelemetryCollector] = None
 
     async def start(self):
         try:
@@ -142,9 +145,9 @@ class JobCoordinator:
 
         try:
             await self.drone.connect()
-            logger.info("Connected to drone")
+            logger.info("Connected to mavsdk system")
         except DroneConnectException as e:
-            raise Exception(f"Drone connection failed: {e}")
+            raise Exception(f"Mavsdk system connection failed: {e}")
 
         self.state.trigger("upload")
         try:
@@ -156,7 +159,7 @@ class JobCoordinator:
         self.state.trigger("arm")
         try:
             await self.drone.arm()
-            logger.info("Drone armed")
+            logger.info("Mavsdk system armed")
         except DroneArmException as e:
             raise Exception(f"Arm failed: {e}")
 
@@ -167,13 +170,42 @@ class JobCoordinator:
         except DroneStartMissionException as e:
             raise Exception(f"Mission start failed: {e}")
 
-        await self._monitor_mission()
+        self.telemetry_collector = TelemetryCollector(
+            self.drone.system, interval_hz=self.config.telemetry_sample_interval
+        )
+
+        self.telemetry_publisher = TelemetryPublisher(
+            self.telemetry_collector,
+            self.mqtt,
+            self.config.telemetry_topic,
+            batch_size=10,
+        )
+
+        await asyncio.gather(
+            self.telemetry_publisher.start(),
+            self.telemetry_collector.start()
+        )
+
+        try:
+            await self._monitor_mission()
+        finally:
+            await self.telemetry_publisher.stop()
+            await self.telemetry_collector.stop()
+
+            logger.debug(f"Telemetry samples collected: {self.telemetry_collector.queue.qsize()}")
+
+            logger.debug(f"Telemetry errors: {self.telemetry_collector.error_count}")
+            logger.debug(f"Publisher errors: {self.telemetry_publisher.error_count}")
+            if self.telemetry_collector.last_error:
+                logger.error(f"Last telemetry error: {self.telemetry_collector.last_error}")
+            if self.telemetry_publisher.last_error:
+                logger.error(f"Last publisher error: {self.telemetry_publisher.last_error}")
 
     async def _monitor_mission(self):
         """Monitor mission progress until completion."""
         try:
             async for progress in self.drone.stream_mission_progress():
-                logger.info(f"Mission progress: {progress.current}/{progress.total}")
+                logger.debug(f"Mission progress: {progress.current}/{progress.total}")
 
                 if progress.is_complete:
                     self.state.trigger("complete")
@@ -196,4 +228,6 @@ class JobCoordinator:
         """Shutdown coordinator and cleanup."""
         logger.info("Shutting down coordinator")
         await self.mqtt.disconnect()
+        if self.state.get_state() == ExecutionState.IN_FLIGHT:
+            await self.drone.cancel_mission()
         logger.info("Coordinator stopped")

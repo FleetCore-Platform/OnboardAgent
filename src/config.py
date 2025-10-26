@@ -26,6 +26,12 @@ class Config:
         self.cert_filepath: str = self._require_path(raw, "CERT_FILEPATH")
         self.pri_key_filepath: str = self._require_path(raw, "PRIVATE_KEY_FILEPATH")
         self.ca_filepath: str = self._require_path(raw, "CA_FILEPATH")
+        self.telemetry_sample_interval: int = self._require_int(
+            raw, "TELEMETRY_SAMPLE_INTERVAL"
+        )
+        self.telemetry_sample_count: int = self._require_int(
+            raw, "TELEMETRY_SAMPLE_COUNT"
+        )
         self.internal_topic = f"$aws/things/{self.thing_name}/jobs/notify"
         self.cancel_topic = f"groups/{self.thing_name}/cancel"
         self.telemetry_topic = f"devices/{self.thing_name}/telemetry"

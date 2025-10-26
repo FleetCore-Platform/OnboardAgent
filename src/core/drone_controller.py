@@ -2,6 +2,7 @@ from typing import AsyncIterator
 
 from mavsdk import System as MavSystem
 from mavsdk.action import ActionError
+from mypy.types import AnyType
 
 from src.exceptions.drone_excetions import *
 from src.models.mission_progress import MissionProgressData
@@ -15,7 +16,7 @@ class MavsdkController:
         self.address: str = address
         self.port: int = port
         self.protocol: str = protocol.value
-        self.__system: MavSystem = MavSystem()
+        self.system: MavSystem = MavSystem()
 
     async def connect(self) -> None:
         """Connect to drone hardware."""
@@ -28,9 +29,9 @@ class MavsdkController:
         )
 
         try:
-            await self.__system.connect(system_address=connection_string)
+            await self.system.connect(system_address=connection_string)
 
-            async for state in self.__system.core.connection_state():
+            async for state in self.system.core.connection_state():
                 if state.is_connected:
                     break
 
@@ -41,7 +42,7 @@ class MavsdkController:
     async def arm(self) -> None:
         """Arm the drone."""
         try:
-            await self.__system.action.arm()
+            await self.system.action.arm()
         except ActionError as e:
             raise DroneArmException(e)
 
@@ -50,34 +51,34 @@ class MavsdkController:
     ) -> None:
         """Upload a mission."""
         try:
-            await self.__system.mission.set_return_to_launch_after_mission(
+            await self.system.mission.set_return_to_launch_after_mission(
                 return_to_launch
             )
 
-            out = await self.__system.mission_raw.import_qgroundcontrol_mission(
+            out = await self.system.mission_raw.import_qgroundcontrol_mission(
                 path_to_mission
             )
 
-            await self.__system.mission_raw.upload_mission(out.mission_items)
+            await self.system.mission_raw.upload_mission(out.mission_items)
         except ActionError as e:
             raise DroneUploadException(e)
 
     async def start_mission(self) -> None:
         try:
-            await self.__system.mission_raw.start_mission()
+            await self.system.mission_raw.start_mission()
         except ActionError as e:
             raise DroneStartMissionException(e)
 
     async def cancel_mission(self) -> None:
         try:
-            await self.__system.mission_raw.clear_mission()
-            await self.__system.action.return_to_launch()
+            await self.system.mission_raw.clear_mission()
+            await self.system.action.return_to_launch()
         except ActionError as e:
             raise DroneCancelMissionException(e)
 
     async def stream_mission_progress(self) -> AsyncIterator[MissionProgressData]:
         try:
-            async for progress in self.__system.mission_raw.mission_progress():
+            async for progress in self.system.mission_raw.mission_progress():
                 yield MissionProgressData(
                     current=progress.current, total=progress.total
                 )
@@ -86,7 +87,7 @@ class MavsdkController:
 
     async def stream_in_air(self) -> AsyncIterator[bool]:
         try:
-            async for in_air in self.__system.telemetry.in_air():
+            async for in_air in self.system.telemetry.in_air():
                 yield in_air
 
         except ActionError as e:
