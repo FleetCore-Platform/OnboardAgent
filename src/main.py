@@ -16,6 +16,9 @@ from src.exceptions.config_exceptions import ConfigException
 def main(config_path: Optional[str] = None):
     try:
         config: Config = Config(config_path)
+        if config.verbose:
+            logger.remove()
+            logger.add(sys.stdout, level="DEBUG")
     except ConfigException as e:
         logger.error(f"Configuration error: {e}")
         sys.exit(1)
@@ -57,7 +60,13 @@ def main(config_path: Optional[str] = None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("config", help="The .config.env configuration file", type=str, default=None, nargs="?")
+    parser.add_argument(
+        "config",
+        help="The .config.env configuration file",
+        type=str,
+        default=None,
+        nargs="?",
+    )
     args = parser.parse_args()
 
     env_file: Optional[str] | None = args.config

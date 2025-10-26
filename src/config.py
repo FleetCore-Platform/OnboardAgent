@@ -15,6 +15,7 @@ class Config:
         else:
             raw: _Environ[str] = os.environ
 
+        self.verbose: Optional[bool] = raw.get("VERBOSE", False)
         self.endpoint: str = self._require(raw, "IOT_ENDPOINT")
         self.thing_name: str = self._require(raw, "IOT_THING_NAME")
         self.drone_address: str = self._require(raw, "DRONE_ADDRESS")
