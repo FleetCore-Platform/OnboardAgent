@@ -7,19 +7,23 @@ from src.exceptions.config_exceptions import ConfigValueException, ConfigTypeExc
 
 class ConfigTest(unittest.TestCase):
 
-    @patch("src.config.dotenv_values")
-    def test_config_load_success(self, mock_dotenv):
-        mock_dotenv.return_value = {
+    @patch("os.path.exists", return_value=True)
+    @patch("os.path.isfile", return_value=True)
+    @patch.dict(
+        "os.environ",
+        {
             "IOT_ENDPOINT": "test.iot.aws.com",
             "IOT_THING_NAME": "drone1",
             "DRONE_ADDRESS": "127.0.0.1",
             "DRONE_PORT": "14540",
             "DRONE_CONNECTION_TYPE": "udpin",
-            "CERT_FILEPATH": "/certs/cert.pem",
-            "PRIVATE_KEY_FILEPATH": "/certs/key.pem",
-            "CA_FILEPATH": "/certs/ca.pem",
-        }
-
+            "CERT_FILEPATH": "./certs/cert.pem",
+            "PRIVATE_KEY_FILEPATH": "./certs/key.pem",
+            "CA_FILEPATH": "./certs/ca.pem",
+        },
+        clear=True,
+    )
+    def test_config_load_success(self, mock_exists, mock_isfile):
         config = Config()
 
         assert config.endpoint == "test.iot.aws.com"
@@ -29,18 +33,16 @@ class ConfigTest(unittest.TestCase):
         assert config.drone_connection_type == ConnectionTypes.UDPIN
         assert config.internal_topic == "$aws/things/drone1/jobs/notify"
 
-    @patch("src.config.dotenv_values")
-    def test_missing_required_field(self, mock_dotenv):
-        mock_dotenv.return_value = {"IOT_ENDPOINT": "test.iot.aws.com"}
-
+    @patch.dict("os.environ", {"IOT_ENDPOINT": "test.iot.aws.com"}, clear=True)
+    def test_missing_required_field(self):
         with self.assertRaises(ConfigValueException) as ctx:
             Config()
 
         assert "IOT_THING_NAME" in str(ctx.exception)
 
-    @patch("src.config.dotenv_values")
-    def test_invalid_port_type(self, mock_dotenv):
-        mock_dotenv.return_value = {
+    @patch.dict(
+        "os.environ",
+        {
             "IOT_ENDPOINT": "test.iot.aws.com",
             "IOT_THING_NAME": "drone1",
             "DRONE_ADDRESS": "127.0.0.1",
@@ -49,16 +51,18 @@ class ConfigTest(unittest.TestCase):
             "CERT_FILEPATH": "/certs/cert.pem",
             "PRIVATE_KEY_FILEPATH": "/certs/key.pem",
             "CA_FILEPATH": "/certs/ca.pem",
-        }
-
+        },
+        clear=True,
+    )
+    def test_invalid_port_type(self):
         with self.assertRaises(ConfigTypeException) as ctx:
             Config()
 
         assert "must be integer" in str(ctx.exception)
 
-    @patch("src.config.dotenv_values")
-    def test_invalid_connection_type(self, mock_dotenv):
-        mock_dotenv.return_value = {
+    @patch.dict(
+        "os.environ",
+        {
             "IOT_ENDPOINT": "test.iot.aws.com",
             "IOT_THING_NAME": "drone1",
             "DRONE_ADDRESS": "127.0.0.1",
@@ -67,9 +71,10 @@ class ConfigTest(unittest.TestCase):
             "CERT_FILEPATH": "/certs/cert.pem",
             "PRIVATE_KEY_FILEPATH": "/certs/key.pem",
             "CA_FILEPATH": "/certs/ca.pem",
-        }
-
+        },
+        clear=True,
+    )
+    def test_invalid_connection_type(self):
         with self.assertRaises(ConfigTypeException) as ctx:
             Config()
-
         assert "ConnectionTypes" in str(ctx.exception)

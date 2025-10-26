@@ -20,7 +20,13 @@ dependencies = [
 module = ["untyped_package.*"]
 follow_untyped_imports = true
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
 [tool.uv]
 dev-dependencies = [
     "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
 ]
