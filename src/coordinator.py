@@ -9,6 +9,7 @@ from src.core.mqtt_manager import MqttManager
 from src.core.state_machine import StateMachine
 from src.enums.execution_state import ExecutionState
 from src.enums.job_status import JobStatus
+from src.exceptions.download_exceptions import DownloadNotAllowedFolderException, DownloadException
 from src.exceptions.drone_excetions import (
     DroneUploadException,
     DroneArmException,
@@ -129,14 +130,16 @@ class JobCoordinator:
         filename = document.steps[0].action.input.args[1]
 
         logger.info(f"Downloading mission from {url}")
-        status, path = handle_download(url, filename)
-
-        if status != 0:
-            raise Exception(f"Download failed with status {status}")
+        try:
+            path = handle_download(url, filename)
+        except DownloadNotAllowedFolderException:
+            raise Exception("Cannot download to a directory other than /tmp")
+        except DownloadException as e:
+            raise Exception(f"Download failed {e}")
 
         logger.info("Download succeeded, extracting mission")
         self.mission_file = extract_mission(path, self.config.thing_name, filename)
-        logger.info(f"Mission file ready: {self.mission_file}")
+        logger.debug(f"Mission file ready: {self.mission_file}")
 
     async def _execute_mission(self):
         """Connect to drone and execute mission."""

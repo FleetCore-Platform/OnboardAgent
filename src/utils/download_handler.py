@@ -2,6 +2,8 @@ import os
 import urllib.request
 from loguru import logger
 
+from src.exceptions.download_exceptions import DownloadException, DownloadNotAllowedFolderException
+
 
 def download_file(url: str, path: str) -> None:
     """
@@ -17,9 +19,8 @@ def download_file(url: str, path: str) -> None:
 
     try:
         urllib.request.urlretrieve(url, path)
-        logger.info(f"Downloading to path {path}")
     except Exception as e:
-        logger.error(f"Couldn't download file: {e}")
+        raise DownloadException(e)
 
 
 def ensure_dir(path: str) -> None:
@@ -34,7 +35,7 @@ def ensure_dir(path: str) -> None:
         os.makedirs(directory)
 
 
-def handle_download(url: str, path: str) -> tuple[int, str]:
+def handle_download(url: str, path: str) -> str:
     """
     Handle the file download process.
     Args:
@@ -46,8 +47,7 @@ def handle_download(url: str, path: str) -> tuple[int, str]:
     if path.startswith("/tmp"):
         ensure_dir(path)
     else:
-        logger.error("Cannot download to a directory other than /tmp")
-        return 1, ""
+        raise DownloadNotAllowedFolderException()
 
     try:
         download_file(url, path)
@@ -57,7 +57,6 @@ def handle_download(url: str, path: str) -> tuple[int, str]:
         else:
             path = path + "/mission.bundle.zip"
 
-        return 0, path
+        return path
     except Exception as e:
-        logger.error(f"Couldn't download file: {e}")
-        return 1, ""
+        raise DownloadException(e)
