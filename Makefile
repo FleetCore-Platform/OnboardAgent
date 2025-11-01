@@ -5,7 +5,7 @@ default: run
 de:
 	@uv venv
 	uv sync
-	/bin/bash ./dev_env.sh
+	/bin/bash ./sim/dev_env.sh
 
 format:
 	black .
