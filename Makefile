@@ -3,9 +3,15 @@
 default: run
 
 de:
+ifeq ($(gazebo),1)
 	@uv venv
 	uv sync
-	/bin/bash ./sim/dev_env.sh
+	/bin/bash ./sim/gazebo_dev_env.sh
+else
+	@uv venv
+	uv sync
+	/bin/bash ./sim/pegasus_dev_env.sh
+endif
 
 format:
 	black .
