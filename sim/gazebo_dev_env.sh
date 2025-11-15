@@ -10,7 +10,8 @@ run() {
   xhost +local:docker
 
 	docker run --rm -it --privileged \
-    --env=LOCAL_USER_ID='1002' \
+	  --env=PX4_GZ_WORLD="default" \
+    --env=LOCAL_USER_ID="1002" \
 		-v /tmp/.X11-unix:/tmp/.X11-unix:ro \
 		-e DISPLAY="$DISPLAY" \
 		-e NVIDIA_VISIBLE_DEVICES=all \

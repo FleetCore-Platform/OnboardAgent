@@ -37,8 +37,8 @@ RUN apt-get update \
     && apt-get clean autoclean \
     && rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
 
-RUN groupadd -g 1002 isaacsim && \
-    useradd -u 1002 -g isaacsim -m -s /bin/bash sim && \
+RUN groupadd -g 1002 gazebosim && \
+    useradd -u 1002 -g gazebosim -m -s /bin/bash sim && \
     chown sim /home/sim
 USER sim
 
@@ -49,6 +49,8 @@ RUN pip install kconfiglib jinja2 empy jsonschema pyros-genmsg packaging toml nu
 WORKDIR /home/sim/PX4-Autopilot/
 RUN git submodule update --init --recursive
 RUN make px4_sitl_default
+
+COPY ./worlds/* Tools/simulation/gz/worlds/
 
 ENTRYPOINT ["make"]
 CMD ["px4_sitl", "gz_x500_mono_cam"]
